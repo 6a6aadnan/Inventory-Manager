@@ -43,7 +43,7 @@ int main() {
 ```
 ## File Structure
 
-- `inventory_manager.cpp`: Contains the main program logic.
+- `inventory_manager.cpp`: Contains the program.
 - `hardware_inventory.txt`: Text file used to store inventory data.
 
 ## Requirements
