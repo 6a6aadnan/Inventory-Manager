@@ -125,9 +125,7 @@ public:
                     delimiter == ',') {
                     hardwareList.push_back({type, model, quantity, price});
                     ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear any remaining characters in ss up to newline
-                  } else {
-                     cerr << "Error: Invalid data format in file." << endl;
-                  }
+                  } 
 
             }
             file.close();
