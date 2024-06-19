@@ -110,6 +110,8 @@ public:
     void loadInventory() {
       try {
           ifstream file(filename);
+          if (!file.is_open()) {
+          }
           hardwareList.clear();
           string line;
           while (getline(file, line)) {
@@ -120,9 +122,7 @@ public:
               float price;
               if (getline(ss, type, ',') && getline(ss, model, ',') && ss >> quantity >> price) {
                   hardwareList.push_back({type, model, quantity, price});
-              } else {
-                  cerr << "" << endl;
-              }
+              } 
               ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the line
           }
           file.close(); // Close the file after reading
