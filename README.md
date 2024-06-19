@@ -56,7 +56,7 @@ Inventory Manager is a C++ application designed for managing a collection of com
      
 ## PostgreSQL Setup
 
-### Amazon RDS PostgreSQL Instance
+### Amazon RDS Instance
 
 1. **Set up an Amazon RDS PostgreSQL instance** or use an existing one.
 
