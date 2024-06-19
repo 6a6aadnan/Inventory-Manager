@@ -110,9 +110,6 @@ public:
     void loadInventory() {
         try {
             ifstream file(filename);
-            if (!file.is_open()) {
-                throw runtime_error("Unable to open file for loading.");
-            }
             hardwareList.clear();
             string line;
             while (getline(file, line)) {
