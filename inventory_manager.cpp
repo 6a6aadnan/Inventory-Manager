@@ -110,7 +110,6 @@ public:
     void loadInventory() {
       try {
           ifstream file(filename);
-          }
           hardwareList.clear();
           string line;
           while (getline(file, line)) {
