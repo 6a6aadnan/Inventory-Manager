@@ -13,11 +13,47 @@ Inventory Manager is a C++ application designed for managing a collection of com
 
 ## Requirements
 
-- C++ compiler with C++11 support
-- Standard C++ libraries
-- libpqxx library for PostgreSQL connectivity in C++ (installation details may vary by system)
-- psycopg2 library for data migration
+- C++ compiler
+- postgresql-devel 
+- libpqxx-devel
+- Python 3
+- psycopg2 
 
+## Linux Setup
+
+### Amazon EC2 Instance
+
+1. **Create EC2 Instance:**
+   - **Launch an Amazon Linux instance on AWS EC2.**
+   - **Configure security groups to allow inbound traffic on ports 22 (SSH) and 5432 (PostgreSQL).**
+2. **SSH into EC2 Instance:**    
+   ```bash
+   ssh -i your-key-pair.pem ec2-user@your-instance-public-dns
+   ```
+3. Install Dependencies:
+   
+   ```bash
+   sudo yum update -y
+   ```
+   ```bash
+   sudo yum install gcc-c++
+   ```
+   ```bash
+   sudo yum install postgresql-devel
+   ```
+   ```bash
+   sudo yum install libpqxx-devel
+   ```
+   ```bash
+   sudo yum install python3
+   ```
+   ```bash
+   sudo yum install python3-pip
+   ```
+   ```bash
+   sudo pip3 install psycopg2
+   ```
+     
 ## PostgreSQL Setup
 
 ### Amazon RDS PostgreSQL Instance
@@ -30,18 +66,7 @@ Inventory Manager is a C++ application designed for managing a collection of com
    - **Username**
    - **Password**
    - **Port number**
-
-## Install libpqxx and psycopg2
-
-Ensure `libpqxx` and `psycopg2` is installed on your system. For Debian-based systems like Ubuntu, you can use the following command in your terminal:
-
-```bash
-sudo apt-get install libpqxx-dev
-```
-```bash
-sudo apt-get install python3-psycopg2
-```
-
+     
 ## Python Script for Data Migration
 To migrate data from a text file to PostgreSQL, use text_to_postgresql.py
 ### Instructions for Running the Python Script
