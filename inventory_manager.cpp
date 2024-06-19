@@ -14,7 +14,6 @@ struct ComputerHardware {
     int quantity;
     float price;
 
-    // Define operator< to facilitate sorting by model
     bool operator<(const ComputerHardware& other) const {
         return model < other.model;
     }
@@ -34,7 +33,7 @@ private:
             for (const auto& hardware : hardwareList) {
                 file << hardware.type << "," << hardware.model << "," << hardware.quantity << "," << hardware.price << endl;
             }
-            file.close(); // Close the file after saving
+            file.close();
         } catch (const exception& e) {
             cerr << "Error: " << e.what() << endl;
         }
@@ -64,7 +63,6 @@ public:
         }
 
         hardwareList.push_back(newHardware);
-        // Sort hardwareList after adding
         sort(hardwareList.begin(), hardwareList.end());
         saveInventory();
     }
@@ -100,7 +98,6 @@ public:
 
     void displayInventory() {
         cout << "Inventory:" << endl;
-        // Sort hardwareList by model before displaying
         sort(hardwareList.begin(), hardwareList.end());
         for (const auto& hardware : hardwareList) {
             cout << "Type: " << hardware.type << ", Model: " << hardware.model << ", Quantity: " << hardware.quantity << ", Price: $" << hardware.price << endl;
@@ -108,28 +105,34 @@ public:
     }
 
     void loadInventory() {
-      try {
-          ifstream file(filename);
-          if (!file.is_open()) {
-          }
-          hardwareList.clear();
-          string line;
-          while (getline(file, line)) {
-              cout << "DEBUG: Reading line: " << line << endl;  // Debug print to check file reading
-              stringstream ss(line);
-              string type, model;
-              int quantity;
-              float price;
-              if (getline(ss, type, ',') && getline(ss, model, ',') && ss >> quantity >> price) {
-                  hardwareList.push_back({type, model, quantity, price});
-              } 
-              ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the line
-          }
-          file.close(); // Close the file after reading
-      } catch (const exception& e) {
-          cerr << "Error: " << e.what() << endl;
-      }
-  }
+        try {
+            ifstream file(filename);
+            if (!file.is_open()) {
+                throw runtime_error("Unable to open file for reading.");
+            }
+
+            hardwareList.clear();
+            string line;
+            while (getline(file, line)) {
+                stringstream ss(line);
+                string type, model;
+                int quantity;
+                float price;
+                char delimiter;
+
+                if (getline(ss, type, ',') && getline(ss, model, ',') &&
+                    ss >> quantity >> delimiter >> price &&
+                    delimiter == ',') {
+                    hardwareList.push_back({type, model, quantity, price});
+                } else {
+                    cerr << "Error: Invalid data format in file." << endl;
+                }
+            }
+            file.close();
+        } catch (const exception& e) {
+            cerr << "Error: " << e.what() << endl;
+        }
+    }
 
 };
 
@@ -146,8 +149,7 @@ void handleAddHardware(Inventory& inventory) {
     cout << "Enter hardware type: ";
     cin >> newHardware.type;
 
-    // Read hardware model (allowing spaces)
-    cin.ignore();  // Ignore the newline character left in the input stream
+    cin.ignore();
     cout << "Enter hardware model: ";
     getline(cin, newHardware.model);
 
@@ -169,7 +171,7 @@ void handleAddHardware(Inventory& inventory) {
 void handleRemoveHardware(Inventory& inventory) {
     string model;
     cout << "Enter model to remove: ";
-    cin.ignore(); // Clear any newline characters left in the input buffer
+    cin.ignore();
     getline(cin, model);
     inventory.removeHardware(model);
 }
@@ -177,7 +179,7 @@ void handleRemoveHardware(Inventory& inventory) {
 void handleSearchHardware(Inventory& inventory) {
     string model;
     cout << "Enter model to search: ";
-    cin.ignore(); // Clear any newline characters left in the input buffer
+    cin.ignore();
     getline(cin, model);
     inventory.searchHardware(model);
 }
