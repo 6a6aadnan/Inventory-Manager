@@ -119,9 +119,7 @@ public:
                 float price;
                 if (getline(ss, type, ',') && getline(ss, model, ',') && ss >> quantity >> price) {
                     hardwareList.push_back({type, model, quantity, price});
-                } else {
-                    cerr << "Error: Incorrect data format in line: " << line << endl;
-                }
+                } 
                 ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the line
             }
             file.close(); // Close the file after reading
