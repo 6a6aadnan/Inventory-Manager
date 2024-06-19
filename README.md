@@ -40,9 +40,9 @@ sudo apt-get install libpqxx-dev
 ```
 
 ## Python Script for Data Migration
-To migrate data from a text file to PostgreSQL, use txt_to_postgresql.py
+To migrate data from a text file to PostgreSQL, use text_to_postgresql.py
 ### Instructions for Running the Python Script
-1. **Save the Python script txt_to_postgresql.py to your local directory.**
+1. **Save the Python script text_to_postgresql.py to your local directory.**
 2. **Replace placeholders in the script:**
    
    - **Update connection_string with your actual PostgreSQL connection details (database name, username, password, host, and port).**
@@ -50,11 +50,11 @@ To migrate data from a text file to PostgreSQL, use txt_to_postgresql.py
 3. **Run the Python script:**
    
    - **Open a terminal or command prompt.**
-   - **Navigate to the directory containing txt_to_postgresql.py.**
+   - **Navigate to the directory containing text_to_postgresql.py.**
    - **Execute the script using Python:**
      
      ```bash
-     python txt_to_postgresql.py
+     python text_to_postgresql.py
      ```
 ## Usage
 
