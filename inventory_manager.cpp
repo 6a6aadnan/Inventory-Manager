@@ -1,10 +1,9 @@
 #include <iostream>
-#include <vector>
-#include <algorithm>
-#include <fstream>
+#include <pqxx/pqxx>
 #include <sstream>
 #include <stdexcept>
-#include <limits>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -21,119 +20,109 @@ struct ComputerHardware {
 
 class Inventory {
 private:
-    vector<ComputerHardware> hardwareList;
-    string filename;
+    pqxx::connection conn;
 
-    void saveInventory() {
-        try {
-            ofstream file(filename);
-            if (!file.is_open()) {
-                throw runtime_error("Unable to open file for saving.");
-            }
-            for (const auto& hardware : hardwareList) {
-                file << hardware.type << "," << hardware.model << "," << hardware.quantity << "," << hardware.price << endl;
-            }
-            file.close();
-        } catch (const exception& e) {
-            cerr << "Error: " << e.what() << endl;
-        }
-    }
-
-    bool isModelUnique(const string& model) const {
-        auto it = find_if(hardwareList.begin(), hardwareList.end(), [&](const ComputerHardware& hardware) {
-            return hardware.model == model;
-        });
-        return it == hardwareList.end();
+    void createSchema() {
+        pqxx::work txn(conn);
+        txn.exec("CREATE TABLE IF NOT EXISTS computer_hardware ("
+                 "    type VARCHAR(255),"
+                 "    model VARCHAR(255) PRIMARY KEY,"
+                 "    quantity INT,"
+                 "    price FLOAT"
+                 ")");
+        txn.commit();
     }
 
 public:
-    Inventory(const string& filename) : filename(filename) {
-        loadInventory();
+    Inventory(const std::string& connectionString)
+        : conn(connectionString) {
+        createSchema(); // Create table if not exists
     }
 
     void addHardware(const ComputerHardware& newHardware) {
-        if (newHardware.quantity < 0 || newHardware.price < 0) {
-            cerr << "Error: Quantity and price must be non-negative." << endl;
-            return;
-        }
+        try {
+            pqxx::work txn(conn);
 
-        if (!isModelUnique(newHardware.model)) {
-            cerr << "Error: Hardware with model " << newHardware.model << " already exists in the inventory." << endl;
-            return;
-        }
+            // Prepare SQL statement
+            std::stringstream sql;
+            sql << "INSERT INTO computer_hardware (type, model, quantity, price) "
+                   "VALUES ($1, $2, $3, $4)";
 
-        hardwareList.push_back(newHardware);
-        sort(hardwareList.begin(), hardwareList.end());
-        saveInventory();
+            // Create prepared statement
+            pqxx::prepare::invocation invoc = txn.prepared("insert_stmt", sql.str());
+
+            // Bind parameters
+            invoc(newHardware.type)(newHardware.model)(newHardware.quantity)(newHardware.price).exec();
+
+            txn.commit();
+            cout << "Added hardware successfully." << endl;
+        } catch (const std::exception& e) {
+            cerr << "Error adding hardware: " << e.what() << endl;
+        }
     }
 
     void removeHardware(const string& model) {
-        auto it = find_if(hardwareList.begin(), hardwareList.end(), [&](const ComputerHardware& hardware) {
-            return hardware.model == model;
-        });
-        if (it != hardwareList.end()) {
-            hardwareList.erase(it);
-            cout << "Hardware " << model << " removed from inventory." << endl;
-            saveInventory();
-        } else {
-            cout << "Hardware not found in inventory." << endl;
+        try {
+            pqxx::work txn(conn);
+
+            // Prepare SQL statement
+            std::stringstream sql;
+            sql << "DELETE FROM computer_hardware WHERE model = $1";
+
+            // Execute the SQL statement
+            pqxx::prepare::invocation invoc = txn.prepared("delete_stmt", sql.str());
+            invoc(model).exec();
+
+            txn.commit();
+            cout << "Removed hardware successfully." << endl;
+        } catch (const std::exception& e) {
+            cerr << "Error removing hardware: " << e.what() << endl;
         }
     }
 
     void searchHardware(const string& model) {
-        string lowercaseModel = model;
-        transform(lowercaseModel.begin(), lowercaseModel.end(), lowercaseModel.begin(), ::tolower);
-        auto it = find_if(hardwareList.begin(), hardwareList.end(), [&](const ComputerHardware& hardware) {
-            string lowercaseHardwareModel = hardware.model;
-            transform(lowercaseHardwareModel.begin(), lowercaseHardwareModel.end(), lowercaseHardwareModel.begin(), ::tolower);
-            return lowercaseHardwareModel == lowercaseModel;
-        });
-        if (it != hardwareList.end()) {
-            cout << "Hardware found in inventory:" << endl;
-            cout << "Type: " << it->type << ", Model: " << it->model << ", Quantity: " << it->quantity << ", Price: $" << it->price << endl;
-        } else {
-            cout << "Hardware not found in inventory." << endl;
+        try {
+            pqxx::work txn(conn);
+
+            // Prepare SQL statement
+            std::stringstream sql;
+            sql << "SELECT type, model, quantity, price FROM computer_hardware WHERE model = $1";
+
+            // Execute the SQL statement
+            pqxx::prepare::invocation invoc = txn.prepared("select_stmt", sql.str());
+            pqxx::result result = invoc(model).exec();
+
+            // Process the result
+            if (!result.empty()) {
+                pqxx::tuple row = result[0];
+                cout << "Hardware found in inventory:" << endl;
+                cout << "Type: " << row["type"].as<string>() << ", Model: " << row["model"].as<string>()
+                     << ", Quantity: " << row["quantity"].as<int>() << ", Price: $" << row["price"].as<float>() << endl;
+            } else {
+                cout << "Hardware not found in inventory." << endl;
+            }
+        } catch (const std::exception& e) {
+            cerr << "Error searching hardware: " << e.what() << endl;
         }
     }
 
     void displayInventory() {
-        cout << "Inventory:" << endl;
-        sort(hardwareList.begin(), hardwareList.end());
-        for (const auto& hardware : hardwareList) {
-            cout << "Type: " << hardware.type << ", Model: " << hardware.model << ", Quantity: " << hardware.quantity << ", Price: $" << hardware.price << endl;
-        }
-    }
-
-    void loadInventory() {
         try {
-            ifstream file(filename);
-            if (!file.is_open()) {
-                throw runtime_error("Unable to open file for reading.");
+            pqxx::work txn(conn);
+
+            // Execute SQL statement to fetch all hardware items
+            pqxx::result result = txn.exec("SELECT type, model, quantity, price FROM computer_hardware ORDER BY model");
+
+            // Display inventory
+            cout << "Inventory:" << endl;
+            for (const auto& row : result) {
+                cout << "Type: " << row["type"].as<string>() << ", Model: " << row["model"].as<string>()
+                     << ", Quantity: " << row["quantity"].as<int>() << ", Price: $" << row["price"].as<float>() << endl;
             }
-
-            hardwareList.clear();
-            string line;
-            while (getline(file, line)) {
-                stringstream ss(line);
-                string type, model;
-                int quantity;
-                float price;
-                char delimiter;
-
-                if (getline(ss, type, ',') && getline(ss, model, ',') &&
-                    ss >> quantity >> delimiter >> price &&
-                    delimiter == ',') {
-                    hardwareList.push_back({type, model, quantity, price});
-                    ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear any remaining characters in ss up to newline
-                  } 
-
-            }
-            file.close();
-        } catch (const exception& e) {
-            cerr << "Error: " << e.what() << endl;
+        } catch (const std::exception& e) {
+            cerr << "Error displaying inventory: " << e.what() << endl;
         }
     }
-
 };
 
 void showMenu() {
@@ -185,7 +174,11 @@ void handleSearchHardware(Inventory& inventory) {
 }
 
 int main() {
-    Inventory inventory("hardware_inventory.txt");
+    // Replace with your actual RDS PostgreSQL endpoint, database name, username, password
+    std::string connectionString = "dbname=mydatabase user=myuser password=mypassword host=myendpoint.rds.amazonaws.com port=5432";
+
+    Inventory inventory(connectionString);
+
     int choice;
     do {
         showMenu();
