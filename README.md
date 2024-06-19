@@ -141,7 +141,7 @@ Here's an example of how to use the program:
 
 3. Remove the hardware item by specifying its model (`RTX 3060`).
 
-4. Search for the hardware item by model (`rtx 3060`).
+4. Search for the hardware item by model (`RTX 3060`).
 
 5. Exit the program.
 
