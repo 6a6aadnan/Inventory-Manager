@@ -2,7 +2,7 @@
 
 ## Overview
 
-Inventory Manager is a C++ application that allows users to manage a collection of computer hardware items. It provides functionality to add new items, remove existing items, search by model, and display the current inventory. Data persistence is achieved using a text file (`hardware_inventory.txt`).
+Inventory Manager is a C++ application designed for managing a collection of computer hardware items. It allows users to add new items, remove existing ones, search by model, and display the current inventory. Data persistence is now achieved using PostgreSQL hosted on Amazon RDS, replacing the previous text file storage.
 
 ## Features
 
@@ -15,7 +15,47 @@ Inventory Manager is a C++ application that allows users to manage a collection 
 
 - C++ compiler with C++11 support
 - Standard C++ libraries
+- libpqxx library for PostgreSQL connectivity in C++ (installation details may vary by system)
+- psycopg2 library for data migration
 
+## PostgreSQL Setup
+
+### Amazon RDS PostgreSQL Instance
+
+1. **Set up an Amazon RDS PostgreSQL instance** or use an existing one.
+
+2. **Note down the following details** from your Amazon RDS PostgreSQL instance:
+   - **Database endpoint**
+   - **Database name**
+   - **Username**
+   - **Password**
+   - **Port number**
+
+## Install libpqxx
+
+Ensure `libpqxx` is installed on your system. For Debian-based systems like Ubuntu, you can use the following command in your terminal:
+
+```bash
+sudo apt-get install libpqxx-dev
+```
+
+## Python Script for Data Migration
+To migrate data from a text file to PostgreSQL, use txt_to_postgresql.py
+### Instructions for Running the Python Script
+1. **Save the Python script txt_to_postgresql.py to your local directory.**
+2. **Replace placeholders in the script:**
+   
+   - **Update connection_string with your actual PostgreSQL connection details (database name, username, password, host, and port).**
+     
+3. **Run the Python script:**
+   
+   - **Open a terminal or command prompt.**
+   - **Navigate to the directory containing txt_to_postgresql.py.**
+   - **Execute the script using Python:**
+     
+     ```bash
+     python txt_to_postgresql.py
+     ```
 ## Usage
 
 1. **Clone the repository:**
@@ -27,7 +67,7 @@ Inventory Manager is a C++ application that allows users to manage a collection 
 2. **Compile the code:**
 
    ```bash
-   g++ inventory_manager.cpp -o inventory_manager
+   g++ -std=c++11 -I/usr/include/postgresql inventory_manager.cpp -o inventory_manager -lpqxx -lpq
    ```
 3. **Run the program:**
 
@@ -53,6 +93,12 @@ Inventory Manager is a C++ application that allows users to manage a collection 
    - The program reads and writes data to `hardware_inventory.txt` for data persistence.
    - Ensure the file has appropriate read and write permissions in your environment.
 
+7. **PostgreSQL Integration:**
+
+   - The program now connects to PostgreSQL using libpqxx for database operations.
+   - Ensure your PostgreSQL connection string (dbname=mydatabase user=myuser password=mypassword host=myendpoint.rds.amazonaws.com port=5432) is correctly configured in the Inventory class constructor 
+     (Inventory(const std::string& connectionString)).
+
 ## Example
 
 Here's an example of how to use the program:
@@ -74,6 +120,8 @@ Here's an example of how to use the program:
 ## Notes
 
 - Ensure all input values are valid as per the program's requirements to avoid errors.
+- Ensure libpqxx and psycopg2 are installed on your system for C++ and Python, respectively, before proceeding with data migration.
+- Adjust PostgreSQL connection details and script paths according to your environment and requirements.
 - For any issues or improvements, please feel free to open an issue or submit a pull request.
 
     
