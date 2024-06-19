@@ -31,12 +31,15 @@ Inventory Manager is a C++ application designed for managing a collection of com
    - **Password**
    - **Port number**
 
-## Install libpqxx
+## Install libpqxx and psycopg2
 
-Ensure `libpqxx` is installed on your system. For Debian-based systems like Ubuntu, you can use the following command in your terminal:
+Ensure `libpqxx` and `psycopg2` is installed on your system. For Debian-based systems like Ubuntu, you can use the following command in your terminal:
 
 ```bash
 sudo apt-get install libpqxx-dev
+```
+```bash
+sudo apt-get install python3-psycopg2
 ```
 
 ## Python Script for Data Migration
@@ -120,8 +123,6 @@ Here's an example of how to use the program:
 ## Notes
 
 - Ensure all input values are valid as per the program's requirements to avoid errors.
-- Ensure libpqxx and psycopg2 are installed on your system for C++ and Python, respectively, before proceeding with data migration.
-- Adjust PostgreSQL connection details and script paths according to your environment and requirements.
 - For any issues or improvements, please feel free to open an issue or submit a pull request.
 
     
