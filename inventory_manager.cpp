@@ -108,25 +108,30 @@ public:
     }
 
     void loadInventory() {
-        try {
-            ifstream file(filename);
-            hardwareList.clear();
-            string line;
-            while (getline(file, line)) {
-                stringstream ss(line);
-                string type, model;
-                int quantity;
-                float price;
-                if (getline(ss, type, ',') && getline(ss, model, ',') && ss >> quantity >> price) {
-                    hardwareList.push_back({type, model, quantity, price});
-                } 
-                ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the line
-            }
-            file.close(); // Close the file after reading
-        } catch (const exception& e) {
-            cerr << "Error: " << e.what() << endl;
-        }
-    }
+      try {
+          ifstream file(filename);
+          }
+          hardwareList.clear();
+          string line;
+          while (getline(file, line)) {
+              cout << "DEBUG: Reading line: " << line << endl;  // Debug print to check file reading
+              stringstream ss(line);
+              string type, model;
+              int quantity;
+              float price;
+              if (getline(ss, type, ',') && getline(ss, model, ',') && ss >> quantity >> price) {
+                  hardwareList.push_back({type, model, quantity, price});
+              } else {
+                  cerr << "" << endl;
+              }
+              ss.ignore(numeric_limits<streamsize>::max(), '\n'); // Ignore any remaining characters in the line
+          }
+          file.close(); // Close the file after reading
+      } catch (const exception& e) {
+          cerr << "Error: " << e.what() << endl;
+      }
+  }
+
 };
 
 void showMenu() {
